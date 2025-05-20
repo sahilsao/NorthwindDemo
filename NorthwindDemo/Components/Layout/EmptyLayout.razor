@@ -4,15 +4,17 @@
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
-<MudLayout>
-    <MudPaper Class="d-flex justify-center">
+<MudLayout>     
+    <MudPaper >
         <MudAppBar Elevation="0">
             <MudSpacer />
             <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
         </MudAppBar>
     </MudPaper>
-    <MudMainContent Class="pt-16 pa-4">
-        @Body
+    <MudMainContent >       
+        <MudContainer Class="pt-12 pa-4" MaxWidth="MaxWidth.Medium" >            
+            @Body
+        </MudContainer>
     </MudMainContent>
 </MudLayout>
 
