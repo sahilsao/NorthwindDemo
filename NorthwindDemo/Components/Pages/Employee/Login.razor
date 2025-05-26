@@ -1,0 +1,104 @@
+﻿@using NorthwindDemo.Components.Layout;
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.EntityFrameworkCore
+@using NorthwindDemo.Context
+
+@page "/"
+@page "/employee/login"
+@layout EmptyLayout
+
+@inject DbContextNorthwind DbContext
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+
+<MudGrid JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+    <MudItem xs="12" sm="6" Class="d-none d-sm-flex">
+        <MudImage ObjectFit="ObjectFit.Contain" Height="200" Width="400" Src="@($"undraw_secure-login.svg")" Alt="login"
+                  Class="rounded-lg mt-20"/>
+    </MudItem>
+    <MudSpacer/>
+    <MudItem xs="12" sm="6">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h5">Login</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCard Outlined="true">
+            <EditForm Model="@_loginModel" OnValidSubmit="OnValidSubmit">
+                <MudCardContent>
+                    <DataAnnotationsValidator/>
+                    <MudTextField Label="User ID" HelperText="Enter your username" Class="mt-3"
+                                  @bind-Value="_loginModel.UserName"
+                                  For="@(() => _loginModel.UserName)" autocomplete="off"/>
+                    <MudTextField Label="Password" HelperText="Enter your password" Class="mt-3"
+                                  @bind-Value="_loginModel.Password" For="@(() => _loginModel.Password)"
+                                  InputType="@_passwordInput"
+                                  Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon"
+                                  OnAdornmentClick="ToggleVisibility"
+                                  AdornmentAriaLabel="Show Password"/>
+                    <MudSpacer/>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
+                               OnClick="HandleLogin"
+                               Class="ml-auto mt-4">Login
+                    </MudButton>
+                </MudCardActions>
+            </EditForm>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    readonly LoginModel _loginModel = new();
+
+    public class LoginModel
+    {
+        [Required] public string? UserName { get; set; }
+
+        [Required] public string? Password { get; set; }
+    }
+
+    private async Task HandleLogin()
+    {
+        var match = await DbContext.Employees
+            .Where(predicate: e => e.FirstName + e.HireDate!.Value.Year == _loginModel.UserName &&
+                                   (e.LastName + e.BirthDate!.Value.Year) == _loginModel.Password)
+            .FirstOrDefaultAsync();
+
+        if (match != null)
+        {
+            Snackbar.Add(message: "Login Successfully", severity: Severity.Success);
+            NavigationManager.NavigateTo("/employee/dashboard");
+        }
+        else
+        {
+            Snackbar.Add(message: "Login Failed", severity: Severity.Error);
+        }
+    }
+
+    private void OnValidSubmit(EditContext context)
+    {
+        StateHasChanged();
+    }
+
+    bool _isShow;
+    InputType _passwordInput = InputType.Password;
+    string _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    void ToggleVisibility()
+    {
+        @if (_isShow)
+        {
+            _isShow = false;
+            _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+            _passwordInput = InputType.Password;
+        }
+        else
+        {
+            _isShow = true;
+            _passwordInputIcon = Icons.Material.Filled.Visibility;
+            _passwordInput = InputType.Text;
+        }
+    }
+}
