@@ -1,20 +1,35 @@
 ﻿@inherits LayoutComponentBase
 
+@using NorthwindDemo.Components.Layout.Customer;
+
+@inject NavigationManager NavigationManager
+@inject CookieService CookieService
+
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 <MudLayout>
-    <MudAppBar Elevation="0">
-        <MudSpacer />        
-        <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />             
+    <MudAppBar Elevation="1">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
+            OnClick="@((e) => DrawerToggle())" />
+        <MudText Typo="Typo.h5" Class="ml-3">Customer</MudText>
+        <MudSpacer />
+        <MudTooltip Text="Toggle Theme" Color="Color.Default">
+            <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
+        </MudTooltip>
+        <MudTooltip Text="Logout" Color="Color.Default">
+            <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="Logout" />
+        </MudTooltip>
     </MudAppBar>
-    <MudMainContent>
-        <MudContainer Class="pt-12 pa-4" MaxWidth="MaxWidth.Medium">
-            @Body
-        </MudContainer>
+    <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+        <CustomerNavMenu />
+    </MudDrawer>
+    <MudMainContent Class="pt-16 pa-4 mt-4" MaxWidth="MaxWidth.Medium">
+        @Body
     </MudMainContent>
 </MudLayout>
+
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
@@ -23,6 +38,7 @@
 </div>
 
 @code {
+    private bool _drawerOpen = true;
     private bool _isDarkMode = true;
     private MudTheme? _theme = null;
 
@@ -94,5 +110,19 @@
         true => Icons.Material.Rounded.DarkMode,
         false => Icons.Material.Outlined.WbSunny,
     };
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private void Logout()
+    {
+        // Clear the customer ID cookie
+        CookieService.DeleteCookie("customerId");
+
+        // Redirect to login page
+        NavigationManager.NavigateTo("/customer/customerlogin");
+    }
 
 }

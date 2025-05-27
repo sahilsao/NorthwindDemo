@@ -1,47 +1,41 @@
-﻿@using NorthwindDemo.Components.Layout;
-@using System.ComponentModel.DataAnnotations
-@using Microsoft.EntityFrameworkCore
-@using NorthwindDemo.Context
+﻿@page "/"
+@page "/employee/employeelogin"
 
-@page "/"
-@page "/employee/login"
+@using NorthwindDemo.Components.Layout;
+@using System.ComponentModel.DataAnnotations;
+
 @layout EmptyLayout
 
-@inject DbContextNorthwind DbContext
 @inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager
 
-<MudGrid JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
-    <MudItem xs="12" sm="6" Class="d-none d-sm-flex">
-        <MudImage ObjectFit="ObjectFit.Contain" Height="200" Width="400" Src="@($"undraw_secure-login.svg")" Alt="login"
-                  Class="rounded-lg mt-20"/>
+<MudGrid Justify="Justify.Center" AlignItems="AlignItems.Center">
+    <MudItem xs="12" sm="6">
+        <MudImage ObjectFit="ObjectFit.Contain" Height="200" Src="@($"undraw_secure-login.svg")" Alt="login"
+            Class="rounded-lg mt-20 align-right" />
     </MudItem>
-    <MudSpacer/>
+    <MudSpacer />
     <MudItem xs="12" sm="6">
         <MudCardHeader>
             <CardHeaderContent>
-                <MudText Typo="Typo.h5">Login</MudText>
+                <MudText Typo="Typo.h5">Employee Login</MudText>
             </CardHeaderContent>
         </MudCardHeader>
         <MudCard Outlined="true">
             <EditForm Model="@_loginModel" OnValidSubmit="OnValidSubmit">
                 <MudCardContent>
-                    <DataAnnotationsValidator/>
+                    <DataAnnotationsValidator />
                     <MudTextField Label="User ID" HelperText="Enter your username" Class="mt-3"
-                                  @bind-Value="_loginModel.UserName"
-                                  For="@(() => _loginModel.UserName)" autocomplete="off"/>
+                        @bind-Value="_loginModel.UserName" For="@(() => _loginModel.UserName)" autocomplete="off" />
                     <MudTextField Label="Password" HelperText="Enter your password" Class="mt-3"
-                                  @bind-Value="_loginModel.Password" For="@(() => _loginModel.Password)"
-                                  InputType="@_passwordInput"
-                                  Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon"
-                                  OnAdornmentClick="ToggleVisibility"
-                                  AdornmentAriaLabel="Show Password"/>
-                    <MudSpacer/>
+                        @bind-Value="_loginModel.Password" For="@(() => _loginModel.Password)"
+                        InputType="@_passwordInput" Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon"
+                        OnAdornmentClick="ToggleVisibility" AdornmentAriaLabel="Show Password" />
+                    <MudSpacer />
                 </MudCardContent>
                 <MudCardActions>
                     <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
-                               OnClick="HandleLogin"
-                               Class="ml-auto mt-4">Login
+                        OnClick="HandleLogin" Class="ml-auto mt-4">Login
                     </MudButton>
                 </MudCardActions>
             </EditForm>
@@ -61,12 +55,16 @@
 
     private async Task HandleLogin()
     {
-        var match = await DbContext.Employees
-            .Where(predicate: e => e.FirstName + e.HireDate!.Value.Year == _loginModel.UserName &&
-                                   (e.LastName + e.BirthDate!.Value.Year) == _loginModel.Password)
-            .FirstOrDefaultAsync();
+        string id = "nadmin";
+        string password = "password@123";
+        bool match = false;
 
-        if (match != null)
+        if (_loginModel.UserName == id && _loginModel.Password == password)
+        {
+          match = true;
+        }
+
+        if (match == true)
         {
             Snackbar.Add(message: "Login Successfully", severity: Severity.Success);
             NavigationManager.NavigateTo("/employee/dashboard");
@@ -75,6 +73,8 @@
         {
             Snackbar.Add(message: "Login Failed", severity: Severity.Error);
         }
+
+        await Task.CompletedTask;
     }
 
     private void OnValidSubmit(EditContext context)

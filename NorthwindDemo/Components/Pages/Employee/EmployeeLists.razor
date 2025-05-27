@@ -1,0 +1,59 @@
+﻿@page "/employee/listofemployees"
+
+@using NorthwindDemo.Components.Layout.Employee;
+@using System.ComponentModel.DataAnnotations;
+@using Microsoft.EntityFrameworkCore;
+@using NorthwindDemo.Context;
+@using NorthwindDemo.Entities;
+
+@layout EmployeeLayout;
+
+@inject DbContextNorthwind DbContext
+
+<PageTitle>Employees List</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">List of Employees</MudText>
+
+@if (Employees == null)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else
+{
+    <MudTable Items="Employees" Hover="true">
+        <HeaderContent>
+            <MudTh>Employee ID</MudTh>
+            <MudTh>First Name</MudTh>
+            <MudTh>Last Name</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="EmployeeID">@context.EmployeeId</MudTd>
+            <MudTd DataLabel="First Name">@context.FirstName</MudTd>
+            <MudTd DataLabel="Last Name">@context.LastName</MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+
+@code {
+    private List<Employee>? Employees;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Employees = await GetCustomersAsync();
+    }
+
+    private async Task<List<Employee>> GetCustomersAsync()
+    {
+        return await DbContext.Employees
+        .OrderBy(c => c.EmployeeId)
+        .Select(c => new Employee
+        {
+            EmployeeId = c.EmployeeId,
+            FirstName = c.FirstName,
+            LastName = c.LastName
+        })
+        .ToListAsync();
+    }
+
+}

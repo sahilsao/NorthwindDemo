@@ -1,0 +1,135 @@
+﻿@page "/customer/customerlogin"
+
+@using Microsoft.EntityFrameworkCore
+@using NorthwindDemo.Components.Layout;
+@using System.ComponentModel.DataAnnotations;
+@using NorthwindDemo.Context
+@using NorthwindDemo.Entities
+@using Microsoft.AspNetCore.Http
+
+
+@layout EmptyLayout
+
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@inject CookieService CookieService
+
+@inject DbContextNorthwind DbContext
+
+<MudGrid Justify="Justify.Center" AlignItems="AlignItems.Center">
+    <MudItem xs="6" sm="6">
+        <MudImage ObjectFit="ObjectFit.Contain" Height="250" Src="@($"undraw_login_weas.svg")" Alt="login"
+            Class="rounded-lg mt-20 align-right" />
+    </MudItem>
+    <MudSpacer />
+    <MudItem xs="12" sm="6">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h5">Customer Login</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCard Outlined="true">
+            <EditForm Model="@_loginModel" OnValidSubmit="OnValidSubmit">
+                <MudCardContent>
+                    <DataAnnotationsValidator />
+                    <MudTextField Label="User ID" HelperText="Enter your username" Class="mt-3"
+                        @bind-Value="_loginModel.UserName" For="@(() => _loginModel.UserName)" autocomplete="off" />
+                    <MudTextField Label="Password" HelperText="Enter your password" Class="mt-3"
+                        @bind-Value="_loginModel.Password" For="@(() => _loginModel.Password)"
+                        InputType="@_passwordInput" Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon"
+                        OnAdornmentClick="ToggleVisibility" AdornmentAriaLabel="Show Password" />
+                    <MudSpacer />
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
+                        OnClick="HandleLogin" Class="ml-auto mt-4">Login
+                    </MudButton>
+                </MudCardActions>
+            </EditForm>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    readonly LoginModel _loginModel = new();
+
+    private bool isLoginSuccessful;
+
+    // Use this to set cookies after the page has rendered
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && isLoginSuccessful)
+        {
+            // Set the cookie after the first render
+            CookieService.SetCookie("customerId", _loginModel.UserName, 10);
+
+            StateHasChanged(); // Request re-render if necessary
+        }
+
+        await Task.CompletedTask;
+    }
+    public class LoginModel
+    {
+        [Required] public string? UserName { get; set; }
+
+        [Required] public string? Password { get; set; }
+    }
+
+    private async Task HandleLogin()
+    {
+        var enteredId = _loginModel.UserName?.Trim().ToUpper();
+        var enteredPassword = _loginModel.Password;
+
+        var customer = await DbContext.Customers
+        .Where(c => c.CustomerId == enteredId)
+        .Select(c => new Customer
+        {
+            CustomerId = c.CustomerId,
+            CompanyName = c.CompanyName
+        })
+        .FirstOrDefaultAsync();
+
+        if (customer != null && enteredPassword == "password@123")
+        {
+            isLoginSuccessful = true; // Flag that login is successful            
+
+            Snackbar.Add(message: "Login Successfully", severity: Severity.Success);
+            NavigationManager.NavigateTo("/customer/customerdashboard");
+
+            StateHasChanged(); // Request re-render if necessary
+        }
+        else
+        {
+            isLoginSuccessful = false; // Flag login failed
+            
+            Snackbar.Add(message: "Login Failed", severity: Severity.Error);
+        }
+
+        await Task.CompletedTask;
+    }
+
+    private void OnValidSubmit(EditContext context)
+    {
+        StateHasChanged();
+    }
+
+    bool _isShow;
+    InputType _passwordInput = InputType.Password;
+    string _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    void ToggleVisibility()
+    {
+        @if (_isShow)
+        {
+            _isShow = false;
+            _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+            _passwordInput = InputType.Password;
+        }
+        else
+        {
+            _isShow = true;
+            _passwordInputIcon = Icons.Material.Filled.Visibility;
+            _passwordInput = InputType.Text;
+        }
+    }
+}

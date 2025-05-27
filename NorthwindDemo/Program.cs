@@ -12,6 +12,9 @@ builder.Services.AddMudServices();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddScoped<CookieService>();
+
 builder.Services.AddDbContext<DbContextNorthwind>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
