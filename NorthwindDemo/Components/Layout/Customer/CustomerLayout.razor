@@ -24,7 +24,7 @@
     <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <CustomerNavMenu />
     </MudDrawer>
-    <MudMainContent Class="pt-16 pa-4 mt-4" max-width="MaxWidth.Medium">
+    <MudMainContent Class="pt-16 pa-4 mt-4">
         @Body
     </MudMainContent>
 </MudLayout>
@@ -118,7 +118,7 @@
     private void Logout()
     {
         // Redirect to login page
-        NavigationManager.NavigateTo("/customer/customerlogin");
+        NavigationManager.NavigateTo("/customer/customerlogout");
     }
 
 }
