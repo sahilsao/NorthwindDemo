@@ -4,6 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
   </PropertyGroup>
 
 
@@ -20,7 +21,6 @@
     </PackageReference>
     <PackageReference Include="MudBlazor" Version="8.*" />
   </ItemGroup>
-
 
   <ItemGroup>
     <Folder Include="Components\Pages\Customers\" />

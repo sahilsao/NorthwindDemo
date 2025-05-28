@@ -3,7 +3,6 @@
 @using NorthwindDemo.Components.Layout.Customer;
 
 @inject NavigationManager NavigationManager
-@inject CookieService CookieService
 
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -25,7 +24,7 @@
     <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <CustomerNavMenu />
     </MudDrawer>
-    <MudMainContent Class="pt-16 pa-4 mt-4" MaxWidth="MaxWidth.Medium">
+    <MudMainContent Class="pt-16 pa-4 mt-4" max-width="MaxWidth.Medium">
         @Body
     </MudMainContent>
 </MudLayout>
@@ -118,9 +117,6 @@
 
     private void Logout()
     {
-        // Clear the customer ID cookie
-        CookieService.DeleteCookie("customerId");
-
         // Redirect to login page
         NavigationManager.NavigateTo("/customer/customerlogin");
     }

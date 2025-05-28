@@ -1,5 +1,6 @@
 ﻿@page "/customer/customerlogin"
 
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using Microsoft.EntityFrameworkCore
 @using NorthwindDemo.Components.Layout;
 @using System.ComponentModel.DataAnnotations;
@@ -12,11 +13,11 @@
 
 @inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager
-@inject CookieService CookieService
+@inject ProtectedSessionStorage SessionStorage
 
 @inject DbContextNorthwind DbContext
 
-<MudGrid Justify="Justify.Center" AlignItems="AlignItems.Center">
+<MudGrid Justify="Justify.Center" align-items="AlignItems.Center">
     <MudItem xs="6" sm="6">
         <MudImage ObjectFit="ObjectFit.Contain" Height="250" Src="@($"undraw_login_weas.svg")" Alt="login"
             Class="rounded-lg mt-20 align-right" />
@@ -52,22 +53,6 @@
 
 @code {
     readonly LoginModel _loginModel = new();
-
-    private bool isLoginSuccessful;
-
-    // Use this to set cookies after the page has rendered
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && isLoginSuccessful)
-        {
-            // Set the cookie after the first render
-            CookieService.SetCookie("customerId", _loginModel.UserName, 10);
-
-            StateHasChanged(); // Request re-render if necessary
-        }
-
-        await Task.CompletedTask;
-    }
     public class LoginModel
     {
         [Required] public string? UserName { get; set; }
@@ -91,17 +76,14 @@
 
         if (customer != null && enteredPassword == "password@123")
         {
-            isLoginSuccessful = true; // Flag that login is successful            
+            await SessionStorage.SetAsync("CustomerID", customer.CustomerId!);
+            await SessionStorage.SetAsync("CustomerName", customer.CompanyName!);
 
             Snackbar.Add(message: "Login Successfully", severity: Severity.Success);
             NavigationManager.NavigateTo("/customer/customerdashboard");
-
-            StateHasChanged(); // Request re-render if necessary
         }
         else
         {
-            isLoginSuccessful = false; // Flag login failed
-            
             Snackbar.Add(message: "Login Failed", severity: Severity.Error);
         }
 
