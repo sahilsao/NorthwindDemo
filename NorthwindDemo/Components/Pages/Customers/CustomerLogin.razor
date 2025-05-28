@@ -77,7 +77,7 @@
         if (customer != null && enteredPassword == "password@123")
         {
             await SessionStorage.SetAsync("CustomerID", customer.CustomerId!);
-            await SessionStorage.SetAsync("CustomerName", customer.CompanyName!);
+            await SessionStorage.SetAsync("CompanyName", customer.CompanyName!);
 
             Snackbar.Add(message: "Login Successfully", severity: Severity.Success);
             NavigationManager.NavigateTo("/customer/customerdashboard");

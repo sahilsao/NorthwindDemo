@@ -15,7 +15,7 @@
 
 <PageTitle>Customer Dashboard</PageTitle>
 
-<MudText Typo="Typo.h3" GutterBottom="true">@UserName Dashboard</MudText>
+<MudText Typo="Typo.h3" GutterBottom="true">Dashboard</MudText>
 
 @code {
 
@@ -26,17 +26,20 @@
     {
         if (firstRender && !_hasLoaded)
         {
-            var result = await SessionStorage.GetAsync<string>("CustomerName");
-            UserName = result.Success ? result.Value : "Unknown";
-            _hasLoaded = true;   
-            
-            if (UserName == "Unknown")
-            {
-                NavigationManager.NavigateTo("/customer/customerlogin");
-            }
-
+            await LoadStateAsync();
+            _hasLoaded = true;
             StateHasChanged(); // Trigger UI re-render
         }
     }
-   
+
+    private async Task LoadStateAsync()
+    {
+        var result = await SessionStorage.GetAsync<string>("CompanyName");
+        UserName = result.Success ? result.Value : "Unknown";
+
+        if (UserName == "Unknown")
+        {
+            NavigationManager.NavigateTo("/customer/customerlogin");
+        }
+    }
 }

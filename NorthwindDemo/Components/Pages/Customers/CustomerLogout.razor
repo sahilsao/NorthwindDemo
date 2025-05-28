@@ -12,7 +12,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        HashSet<string> sessionKeys = new() { "CustomerID", "CustomerName" };
+        HashSet<string> sessionKeys = new() { "CustomerID", "CompanyName" };
         foreach (var key in sessionKeys)
         {
             await SessionStorage.DeleteAsync(key);

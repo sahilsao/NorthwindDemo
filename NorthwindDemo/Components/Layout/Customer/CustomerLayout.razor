@@ -1,7 +1,9 @@
 ﻿@inherits LayoutComponentBase
 
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using NorthwindDemo.Components.Layout.Customer;
 
+@inject ProtectedSessionStorage SessionStorage
 @inject NavigationManager NavigationManager
 
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
@@ -12,7 +14,7 @@
     <MudAppBar Elevation="1">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
             OnClick="@((e) => DrawerToggle())" />
-        <MudText Typo="Typo.h5" Class="ml-3">Customer</MudText>
+        <MudText Typo="Typo.h5" Class="ml-3">@UserName</MudText>
         <MudSpacer />
         <MudTooltip Text="Toggle Theme" Color="Color.Default">
             <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
@@ -119,6 +121,18 @@
     {
         // Redirect to login page
         NavigationManager.NavigateTo("/customer/customerlogout");
+    }
+
+    public string? UserName { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var result = await SessionStorage.GetAsync<string>("CompanyName");
+            UserName = result.Success ? result.Value : "Unknown";            
+            StateHasChanged(); // Trigger UI re-render
+        }
     }
 
 }
