@@ -1,4 +1,4 @@
-﻿@page "/customer/customerlogin"
+﻿@page "/customer/customer-login"
 
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using Microsoft.EntityFrameworkCore
@@ -8,19 +8,18 @@
 @using NorthwindDemo.Entities
 @using Microsoft.AspNetCore.Http
 
-
 @layout EmptyLayout
 
 @inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager
-@inject ProtectedSessionStorage SessionStorage
+@inject ProtectedSessionStorage ProtectedSessionStorage
 
 @inject DbContextNorthwind DbContext
 
 <MudGrid Justify="Justify.Center" AlignItems="AlignItems.Center">
     <MudItem xs="6" sm="6">
         <MudImage ObjectFit="ObjectFit.Contain" Height="250" Src="@($"undraw_login_weas.svg")" Alt="login"
-            Class="rounded-lg mt-20 align-right" />
+                  Class="rounded-lg mt-20 align-right" />
     </MudItem>
     <MudSpacer />
     <MudItem xs="12" sm="6">
@@ -34,16 +33,17 @@
                 <MudCardContent>
                     <DataAnnotationsValidator />
                     <MudTextField Label="User ID" HelperText="Enter your username" Class="mt-3"
-                        @bind-Value="_loginModel.UserName" For="@(() => _loginModel.UserName)" autocomplete="off" />
+                                  @bind-Value="_loginModel.UserName" For="@(() => _loginModel.UserName)" autocomplete="off" />
                     <MudTextField Label="Password" HelperText="Enter your password" Class="mt-3"
-                        @bind-Value="_loginModel.Password" For="@(() => _loginModel.Password)"
-                        InputType="@_passwordInput" Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon"
-                        OnAdornmentClick="ToggleVisibility" AdornmentAriaLabel="Show Password" />
+                                  @bind-Value="_loginModel.Password" For="@(() => _loginModel.Password)"
+                                  InputType="@_passwordInput" Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon"
+                                  OnAdornmentClick="ToggleVisibility" AdornmentAriaLabel="Show Password" />
                     <MudSpacer />
                 </MudCardContent>
                 <MudCardActions>
                     <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
-                        OnClick="HandleLogin" Class="ml-auto mt-4">Login
+                               OnClick="HandleLogin" Class="ml-auto mt-4">
+                        Login
                     </MudButton>
                 </MudCardActions>
             </EditForm>
@@ -53,11 +53,14 @@
 
 @code {
     readonly LoginModel _loginModel = new();
+
     public class LoginModel
     {
-        [Required] public string? UserName { get; set; }
+        [Required]
+        public string? UserName { get; set; }
 
-        [Required] public string? Password { get; set; }
+        [Required]
+        public string? Password { get; set; }
     }
 
     private async Task HandleLogin()
@@ -76,11 +79,11 @@
 
         if (customer != null && enteredPassword == "password@123")
         {
-            await SessionStorage.SetAsync("CustomerID", customer.CustomerId!);
-            await SessionStorage.SetAsync("CompanyName", customer.CompanyName!);
+            await ProtectedSessionStorage.SetAsync("CustomerID", customer.CustomerId!);
+            await ProtectedSessionStorage.SetAsync("CompanyName", customer.CompanyName!);
 
             Snackbar.Add(message: "Login Successfully", severity: Severity.Success);
-            NavigationManager.NavigateTo("/customer/customerdashboard");
+            NavigationManager.NavigateTo("/customer/customer-dashboard");
         }
         else
         {

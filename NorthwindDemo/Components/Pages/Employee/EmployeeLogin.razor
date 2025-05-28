@@ -1,5 +1,5 @@
 ﻿@page "/"
-@page "/employee/employeelogin"
+@page "/employee/employee-login"
 
 @using NorthwindDemo.Components.Layout;
 @using System.ComponentModel.DataAnnotations;
@@ -48,14 +48,16 @@
 
     public class LoginModel
     {
-        [Required] public string? UserName { get; set; }
+        [Required] 
+        public string? UserName { get; set; }
 
-        [Required] public string? Password { get; set; }
+        [Required] 
+        public string? Password { get; set; }
     }
 
     private async Task HandleLogin()
     {
-        string id = "nadmin";
+        string id = "admin";
         string password = "password@123";
         bool match = false;
 
@@ -67,7 +69,7 @@
         if (match == true)
         {
             Snackbar.Add(message: "Login Successfully", severity: Severity.Success);
-            NavigationManager.NavigateTo("/employee/dashboard");
+            NavigationManager.NavigateTo("/employee/employee-dashboard");
         }
         else
         {

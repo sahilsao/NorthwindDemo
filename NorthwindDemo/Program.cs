@@ -1,16 +1,24 @@
 using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 using MudBlazor.Services;
 using NorthwindDemo.Components;
 using NorthwindDemo.Context;
+using NorthwindDemo.Sessions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add MudBlazor services
-builder.Services.AddMudServices();
+builder.Services.AddMudServices(config =>
+{
+    config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomEnd;
+});
+
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddScoped<CustomerSessions>();
 
 builder.Services.AddDbContext<DbContextNorthwind>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

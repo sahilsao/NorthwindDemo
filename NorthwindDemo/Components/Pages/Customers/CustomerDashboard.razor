@@ -1,17 +1,18 @@
-@page "/customer/customerdashboard"
+@page "/customer/customer-dashboard"
 
-@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using NorthwindDemo.Components.Layout.Customer;
 @using System.ComponentModel.DataAnnotations;
 @using Microsoft.EntityFrameworkCore;
 @using NorthwindDemo.Context;
 @using NorthwindDemo.Entities;
+@using NorthwindDemo.Sessions;
+
+@inject CustomerSessions CustomerSessions
 
 @layout CustomerLayout
 
 @inject NavigationManager NavigationManager
 @inject DbContextNorthwind DbContext
-@inject ProtectedSessionStorage SessionStorage
 
 <PageTitle>Customer Dashboard</PageTitle>
 
@@ -34,12 +35,11 @@
 
     private async Task LoadStateAsync()
     {
-        var result = await SessionStorage.GetAsync<string>("CompanyName");
-        UserName = result.Success ? result.Value : "Unknown";
+        UserName = await CustomerSessions.GetCompanyName();        
 
-        if (UserName == "Unknown")
+        if (UserName == null)
         {
-            NavigationManager.NavigateTo("/customer/customerlogin");
+            NavigationManager.NavigateTo("/customer/customer-login");
         }
     }
 }
