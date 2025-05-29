@@ -23,12 +23,12 @@
         <MudCard Outlined="true">
             <MudCardContent>
                 <MudText>
-                    Total Orders 📦
+                    <MudIcon Icon="@Icons.Material.Filled.LocalShipping"></MudIcon> Total Orders
                 </MudText>
                 <MudText Typo="Typo.h6"><strong>@TotalOrders</strong></MudText>
             </MudCardContent>
             <MudCardActions>
-                <MudButton Variant="Variant.Text" Color="Color.Primary">View All Orders</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="ViewAllOrders">View All Orders</MudButton>
             </MudCardActions>
         </MudCard>
     </MudItem>
@@ -75,5 +75,11 @@
         TotalOrders = totalOrders.ToString();
 
         StateHasChanged();
+    }
+
+    public async Task ViewAllOrders()
+    {
+        NavigationManager.NavigateTo("/customer/customer-orders");
+        await Task.CompletedTask;
     }
 }

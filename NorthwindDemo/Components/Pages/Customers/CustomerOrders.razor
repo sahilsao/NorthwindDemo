@@ -14,66 +14,60 @@
 @inject NavigationManager NavigationManager
 @inject DbContextNorthwind DbContext
 
-<PageTitle>Customer Dashboard</PageTitle>
+<PageTitle>Customer Orders</PageTitle>
 
-<MudText Typo="Typo.h3" GutterBottom="true">Dashboard</MudText>
+<MudText Typo="Typo.h3" GutterBottom="true">Customer Orders</MudText>
 
-<MudGrid>
-    <MudItem>
-        <MudCard Outlined="true">
-            <MudCardContent>
-                <MudText>
-                    Total Orders 📦
-                </MudText>
-                <MudText Typo="Typo.h6"><strong>@TotalOrders</strong></MudText>
-            </MudCardContent>
-            <MudCardActions>
-                <MudButton Variant="Variant.Text" Color="Color.Primary">View All Orders</MudButton>
-            </MudCardActions>
-        </MudCard>
-    </MudItem>
-    <MudSpacer />
-</MudGrid>
+@if (Orders == null)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else
+{
+    <MudTable Items="Orders" Hover="true">
+        <HeaderContent>
+            <MudTh>Order ID</MudTh>
+            <MudTh>Employee ID</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Order ID">@context.OrderId</MudTd>
+            <MudTd DataLabel="Employee ID">@context.EmployeeId</MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
 
 @code {
 
-    public string? UserName { get; set; }
+    private List<Order>? Orders;
     private bool _hasLoaded = false;
-    public string? TotalOrders { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && !_hasLoaded)
         {
-            await LoadStateAsync();
+            Orders = await GetOrdersAsync();
             _hasLoaded = true;
             StateHasChanged(); // Trigger UI re-render
         }
     }
 
-    private async Task LoadStateAsync()
+    private async Task<List<Order>> GetOrdersAsync()
     {
-        UserName = await CustomerSessions.GetCompanyName();
+        String CustomerID = await CustomerSessions.GetCustomerID();        
 
-        if (UserName == null)
+        if (CustomerID == null)
         {
             NavigationManager.NavigateTo("/customer/customer-login");
         }
 
-        GetTotalOrders();
-    }
-
-    public async void GetTotalOrders()
-    {
-        String CustomerID = await CustomerSessions.GetCustomerID();
-
-        var totalOrders = await DbContext.Orders
+        return await DbContext.Orders
         .Where(o => o.CustomerId == CustomerID)
-        .CountAsync();
-
-        // Convert the count to a string
-        TotalOrders = totalOrders.ToString();
-
-        StateHasChanged();
+        .Select(c => new Order
+        {
+            OrderId = c.OrderId,
+            EmployeeId = c.EmployeeId
+        })
+        .ToListAsync();
     }
 }
