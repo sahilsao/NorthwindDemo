@@ -1,4 +1,4 @@
-﻿@page "/customer/customer-orders"
+﻿@page "/customer/orders"
 
 @using NorthwindDemo.Components.Layout.Customer;
 @using System.ComponentModel.DataAnnotations;
@@ -12,41 +12,47 @@
 @layout CustomerLayout
 
 @inject NavigationManager NavigationManager
-@inject DbContextNorthwind DbContext
+
+@inject IDbContextFactory<DbContextNorthwind> DbContextFactory
+
 
 <PageTitle>Customer Orders</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Customer Orders</MudText>
 
-@if (Orders == null)
+@if (_Orders == null)
 {
     <MudProgressCircular Color="Color.Default" Indeterminate="true" />
 }
 else
 {
-    <MudTable Items="Orders" Hover="true">
-        <HeaderContent>
-            <MudTh>Order ID</MudTh>
-            <MudTh>Employee ID</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="Order ID">@context.OrderId</MudTd>
-            <MudTd DataLabel="Employee ID">@context.EmployeeId</MudTd>
-        </RowTemplate>
-    </MudTable>
+    <MudDataGrid Items="@_Orders" SortMode="SortMode.Single">
+        <Columns>
+            <TemplateColumn Title="Order ID" Sortable="true" SortBy="@(x => x.OrderId)">
+                <CellTemplate>
+                    <MudLink Href="@($"/customer/orders-details/{context.Item.OrderId}")">@context.Item.OrderId</MudLink>
+                </CellTemplate>
+            </TemplateColumn>
+            <PropertyColumn Property="x => x.EmployeeId" Title="Employee ID" />
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager />
+        </PagerContent>
+    </MudDataGrid>
 }
 
 
 @code {
 
-    private List<Order>? Orders;
+
+    private List<Order>? _Orders;
     private bool _hasLoaded = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && !_hasLoaded)
         {
-            Orders = await GetOrdersAsync();
+            _Orders = await GetOrdersAsync();
             _hasLoaded = true;
             StateHasChanged(); // Trigger UI re-render
         }
@@ -54,14 +60,16 @@ else
 
     private async Task<List<Order>> GetOrdersAsync()
     {
-        String CustomerID = await CustomerSessions.GetCustomerID();        
+        String CustomerID = await CustomerSessions.GetCustomerID();
 
         if (CustomerID == null)
         {
-            NavigationManager.NavigateTo("/customer/customer-login");
+            NavigationManager.NavigateTo("/customer/login");
         }
 
-        return await DbContext.Orders
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+
+        return await dbContext.Orders
         .Where(o => o.CustomerId == CustomerID)
         .Select(c => new Order
         {
@@ -70,4 +78,5 @@ else
         })
         .ToListAsync();
     }
+
 }

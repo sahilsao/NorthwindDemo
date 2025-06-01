@@ -20,7 +20,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddScoped<CustomerSessions>();
 
-builder.Services.AddDbContext<DbContextNorthwind>(
+builder.Services.AddDbContextFactory<DbContextNorthwind>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();

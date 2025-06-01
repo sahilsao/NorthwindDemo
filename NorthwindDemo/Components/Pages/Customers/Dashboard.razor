@@ -1,4 +1,4 @@
-﻿@page "/customer/customer-dashboard"
+﻿@page "/customer/dashboard"
 
 @using NorthwindDemo.Components.Layout.Customer;
 @using System.ComponentModel.DataAnnotations;
@@ -12,28 +12,32 @@
 @layout CustomerLayout
 
 @inject NavigationManager NavigationManager
-@inject DbContextNorthwind DbContext
+@inject IDbContextFactory<DbContextNorthwind> DbContextFactory
+
 
 <PageTitle>Customer Dashboard</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Dashboard</MudText>
 
+
 <MudGrid>
     <MudItem>
         <MudCard Outlined="true">
             <MudCardContent>
-                <MudText>
-                    <MudIcon Icon="@Icons.Material.Filled.LocalShipping"></MudIcon> Total Orders
+                <MudText Typo="Typo.h6" Color="Color.Primary" GutterBottom="true">
+                    Total Orders 📦
                 </MudText>
                 <MudText Typo="Typo.h6"><strong>@TotalOrders</strong></MudText>
             </MudCardContent>
             <MudCardActions>
-                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="ViewAllOrders">View All Orders</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="ViewAllOrders">View All Orders
+                </MudButton>
             </MudCardActions>
         </MudCard>
     </MudItem>
     <MudSpacer />
 </MudGrid>
+
 
 @code {
 
@@ -57,17 +61,19 @@
 
         if (UserName == null)
         {
-            NavigationManager.NavigateTo("/customer/customer-login");
+            NavigationManager.NavigateTo("/customer/login");
         }
-         
-        GetTotalOrders();
+
+        await GetTotalOrders();
     }
 
-    public async void GetTotalOrders()
+    public async Task GetTotalOrders()
     {
         String CustomerID = await CustomerSessions.GetCustomerID();
 
-        var totalOrders = await DbContext.Orders
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+
+        var totalOrders = await dbContext.Orders
         .Where(o => o.CustomerId == CustomerID)
         .CountAsync();
 
@@ -79,7 +85,7 @@
 
     public async Task ViewAllOrders()
     {
-        NavigationManager.NavigateTo("/customer/customer-orders");
+        NavigationManager.NavigateTo("/customer/orders");
         await Task.CompletedTask;
     }
 }

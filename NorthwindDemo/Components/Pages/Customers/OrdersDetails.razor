@@ -1,0 +1,107 @@
+﻿@page "/customer/orders-details/{OrderId:int}"
+
+@using NorthwindDemo.Components.Layout.Customer
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.EntityFrameworkCore
+@using NorthwindDemo.Context
+@using NorthwindDemo.Entities
+@using NorthwindDemo.Sessions
+
+@inject CustomerSessions CustomerSessions
+@layout CustomerLayout
+@inject NavigationManager NavigationManager
+@inject IDbContextFactory<DbContextNorthwind> DbContextFactory
+
+<PageTitle>Order Details</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Order Details</MudText>
+
+@if (order == null)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else
+{
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h6" Color="Color.Primary">Order Information</MudText>
+                    <MudText><b>Order ID:</b> @order.OrderId</MudText>
+                    <MudText><b>Order Date:</b> @order.OrderDate?.ToString("dd/MM/yyyy")</MudText>
+                    <MudText><b>Required Date:</b> @order.RequiredDate?.ToString("dd/MM/yyyy")</MudText>
+                    <MudText><b>Shipped Date:</b> @order.ShippedDate?.ToString("dd/MM/yyyy")</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h6" Color="Color.Primary">Customer Information</MudText>
+                    <MudText><b>Customer ID:</b> @order.CustomerId</MudText>
+                    <MudText><b>Employee ID:</b> @order.EmployeeId</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h6" Color="Color.Primary">Shipping Information</MudText>
+                    <MudText><b>Ship Name:</b> @order.ShipName</MudText>
+                    <MudText><b>Ship Address:</b> @order.ShipAddress</MudText>
+                    <MudText><b>Ship City:</b> @order.ShipCity</MudText>
+                    <MudText><b>Ship Country:</b> @order.ShipCountry</MudText>
+                    <MudText><b>Freight:</b> @order.Freight?.ToString("C")</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        @if (order.OrderDetails != null && order.OrderDetails.Any())
+        {
+            <MudItem xs="12">
+                <MudCard>
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6" Color="Color.Primary" GutterBottom="true">Order Items</MudText>
+                        <MudDataGrid Items="@order.OrderDetails" Elevation="0">
+                            <Columns>
+                                <PropertyColumn Property="x => x.ProductId" Title="Product ID" />
+                                <PropertyColumn Property="x => x.Quantity" Title="Quantity" />
+                                <PropertyColumn Property="x => x.UnitPrice" Title="Unit Price" Format="C" />
+                                <PropertyColumn Property="x => x.Discount" Title="Discount" Format="P" />
+                                <TemplateColumn Title="Total">
+                                    <CellTemplate>
+                                        @((context.Item.UnitPrice * context.Item.Quantity * (1 - (decimal)context.Item.Discount)).ToString("C"))
+                                    </CellTemplate>
+                                </TemplateColumn>
+                            </Columns>
+                        </MudDataGrid>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        }
+
+        <MudItem xs="12">
+            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.ArrowBack"
+                OnClick="@(() => NavigationManager.NavigateTo("/customer/orders"))">
+                Back to Orders
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    [Parameter]
+    public int OrderId { get; set; }
+    private Order? order;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+
+        order = await dbContext.Orders
+        .Include(o => o.OrderDetails) // Include related entities if needed
+        .FirstOrDefaultAsync(o => o.OrderId == OrderId);
+    }
+}
