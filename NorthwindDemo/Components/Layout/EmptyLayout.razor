@@ -10,7 +10,7 @@
         <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />             
     </MudAppBar>
     <MudMainContent>
-        <MudContainer Class="pt-12 pa-4" MaxWidth="MaxWidth.Medium">
+        <MudContainer MaxWidth="MaxWidth.Medium" Style=" display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 64px);">
             @Body
         </MudContainer>
     </MudMainContent>

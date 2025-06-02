@@ -66,20 +66,26 @@ else
                         <MudText Typo="Typo.h6" Color="Color.Primary" GutterBottom="true">Order Items</MudText>
                         <MudDataGrid Items="@order.OrderDetails" Elevation="0">
                             <Columns>
-                                <PropertyColumn Property="x => x.ProductId" Title="Product ID" />
+                                <TemplateColumn Title="Product ID" Sortable="true" SortBy="@(x => x.ProductId)">
+                                    <CellTemplate>
+                                        <MudLink Href="@($"/customer/products-details/{context.Item.ProductId}")">
+                                            @context.Item.ProductId</MudLink>
+                                    </CellTemplate>
+                                </TemplateColumn>
                                 <PropertyColumn Property="x => x.Quantity" Title="Quantity" />
                                 <PropertyColumn Property="x => x.UnitPrice" Title="Unit Price" Format="C" />
                                 <PropertyColumn Property="x => x.Discount" Title="Discount" Format="P" />
                                 <TemplateColumn Title="Total">
                                     <CellTemplate>
-                                        @((context.Item.UnitPrice * context.Item.Quantity * (1 - (decimal)context.Item.Discount)).ToString("C"))
-                                    </CellTemplate>
-                                </TemplateColumn>
-                            </Columns>
-                        </MudDataGrid>
-                    </MudCardContent>
-                </MudCard>
-            </MudItem>
+                                        @((context.Item.UnitPrice * context.Item.Quantity * (1 -
+                                                                        (decimal)context.Item.Discount)).ToString("C"))
+                            </CellTemplate>
+                        </TemplateColumn>
+                    </Columns>
+                </MudDataGrid>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
         }
 
         <MudItem xs="12">
@@ -94,6 +100,8 @@ else
 @code {
     [Parameter]
     public int OrderId { get; set; }
+    [Parameter]
+    public int ProductId { get; set; }
     private Order? order;
 
     protected override async Task OnInitializedAsync()

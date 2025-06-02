@@ -1,0 +1,127 @@
+﻿@page "/customer/products-details/{ProductId:int}"
+
+@using NorthwindDemo.Components.Layout.Customer
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.EntityFrameworkCore
+@using NorthwindDemo.Context
+@using NorthwindDemo.Entities
+@using NorthwindDemo.Sessions
+
+@inject CustomerSessions CustomerSessions
+@layout CustomerLayout
+@inject NavigationManager NavigationManager
+@inject IDbContextFactory<DbContextNorthwind> DbContextFactory
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Product Details</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Product Details</MudText>
+
+@if (product == null)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else
+{
+    <MudGrid>
+        <!-- Product Information Card -->
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h6" Color="Color.Primary">Product Information</MudText>
+                    <MudText><b>Product ID:</b> @product.ProductId</MudText>
+                    <MudText><b>Product Name:</b> @product.ProductName</MudText>
+                    <MudText><b>Category ID:</b> @product.CategoryId</MudText>
+                    <MudText><b>Supplier ID:</b> @product.SupplierId</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <!-- Pricing Information Card -->
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h6" Color="Color.Primary">Pricing & Stock</MudText>
+                    <MudText><b>Unit Price:</b> @product.UnitPrice?.ToString("C")</MudText>
+                    <MudText><b>Units in Stock:</b> @product.UnitsInStock</MudText>
+                    <MudText><b>Units on Order:</b> @product.UnitsOnOrder</MudText>
+                    <MudText><b>Reorder Level:</b> @product.ReorderLevel</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <!-- Product Details Card -->
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h6" Color="Color.Primary">Product Details</MudText>
+                    <MudText><b>Quantity per Unit:</b> @product.QuantityPerUnit</MudText>
+                    <MudText><b>Discontinued:</b> @(product.Discontinued ? "Yes" : "No")</MudText>
+                    @if (product.Discontinued)
+                    {
+                        <MudText Color="Color.Error" Size="Size.Small">Discontinued</MudText>
+                    }
+                    else
+                    {
+                        <MudText Color="Color.Success" Size="Size.Small">Available</MudText>
+                    }
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <!-- Order History for this Product -->
+        @if (product.OrderDetails != null && product.OrderDetails.Any())
+        {
+            <MudItem xs="12">
+                <MudCard>
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6" Color="Color.Primary" GutterBottom="true">Order History for this Product</MudText>
+                        <MudDataGrid Items="@product.OrderDetails" Elevation="0">
+                            <Columns>
+                                <PropertyColumn Property="x => x.OrderId" Title="Order ID" />
+                                <PropertyColumn Property="x => x.Quantity" Title="Quantity" />
+                                <PropertyColumn Property="x => x.UnitPrice" Title="Unit Price" Format="$#,##0.00" />
+                                <PropertyColumn Property="x => x.Discount" Title="Discount" Format="P" />
+                                <TemplateColumn Title="Total">
+                                    <CellTemplate>
+                                        @($"${(context.Item.UnitPrice * context.Item.Quantity * (1 - (decimal)context.Item.Discount)):N2}")
+                                    </CellTemplate>
+                                </TemplateColumn>                                
+                            </Columns>
+                            <PagerContent>
+                                <MudDataGridPager />
+                            </PagerContent>
+                        </MudDataGrid>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        }
+
+        <!-- Navigation Buttons -->
+        <MudItem xs="12">
+                <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.ArrowBack"
+                          OnClick="@(() => JSRuntime.InvokeVoidAsync("history.back"))">
+                    Back to Orders
+                </MudButton>        
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    [Parameter]
+    public int OrderId { get; set; }
+    [Parameter]
+    public int ProductId { get; set; }
+    private Product? product;
+    protected override async Task OnInitializedAsync()
+    {       
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+
+        product = await dbContext.Products
+            .Include(p => p.OrderDetails) // Include order history for this product
+                .ThenInclude(od => od.Order) // Include order information if needed
+            .Include(p => p.Category) // Include category information if needed
+            .Include(p => p.Supplier) // Include supplier information if needed
+            .FirstOrDefaultAsync(p => p.ProductId == ProductId);
+    }       
+}

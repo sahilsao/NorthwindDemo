@@ -20,11 +20,10 @@
 @inject DbContextNorthwind DbContext
 
 <MudGrid>
-    <MudItem xs="6" sm="6">
+    <MudItem xs="12" sm="6">
         <MudImage ObjectFit="ObjectFit.Contain" Height="250" Src="@($"undraw_login_weas.svg")" Alt="login"
-            Class="rounded-lg mt-20 align-right" />
+                  Class="rounded-lg mt-20 align-right d-none d-sm-block" />
     </MudItem>
-    <MudSpacer />
     <MudItem xs="12" sm="6">
         <MudCardHeader>
             <CardHeaderContent>

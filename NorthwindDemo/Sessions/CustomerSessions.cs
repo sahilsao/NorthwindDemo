@@ -9,7 +9,6 @@ namespace NorthwindDemo.Sessions
         {
             ProtectedSessionStorage = _ProtectedSessionStore;
         }
-
         public async Task<String> GetCustomerID()
         {
             var val = await ProtectedSessionStorage.GetAsync<String>("CustomerID");

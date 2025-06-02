@@ -1,5 +1,8 @@
 ﻿@inherits LayoutComponentBase
 @using NorthwindDemo.Components.Layout.Employee;
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+
+@inject ProtectedSessionStorage ProtectedSessionStorage
 
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -7,7 +10,8 @@
 <MudSnackbarProvider />
 <MudLayout>
     <MudAppBar Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
+            OnClick="@((e) => DrawerToggle())" />
         <MudText Typo="Typo.h5" Class="ml-3">Employee</MudText>
         <MudSpacer />
         <MudTooltip Text="Toggle Theme" Color="Color.Default">
@@ -22,8 +26,10 @@
     <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <EmployeeNavMenu />
     </MudDrawer>
-    <MudMainContent Class="pt-16 pa-4 mt-4">
-        @Body
+    <MudMainContent Class="pt-16 pa-4">
+        <MudContainer MaxWidth="MaxWidth.Medium">
+            @Body
+        </MudContainer>
     </MudMainContent>
 </MudLayout>
 
@@ -39,6 +45,29 @@
     private bool _isDarkMode = true;
     private MudTheme? _theme = null;
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                // Load dark mode preference from protected local storage
+                var result = await ProtectedSessionStorage.GetAsync<bool>("darkMode");
+
+                if (result.Success)
+                {
+                    _isDarkMode = result.Value;
+                    StateHasChanged(); // Trigger re-render with the loaded preference
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                // This can happen during prerendering, just ignore and use default
+            }
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -58,9 +87,19 @@
         };
     }
 
-    private void DarkModeToggle()
+    private async Task DarkModeToggle()
     {
         _isDarkMode = !_isDarkMode;
+
+        try
+        {
+            // Save dark mode preference to protected local storage
+            await ProtectedSessionStorage.SetAsync("darkMode", _isDarkMode);
+        }
+        catch (InvalidOperationException)
+        {
+            // This can happen during prerendering, just ignore
+        }
     }
 
     private readonly PaletteLight _lightPalette = new()
