@@ -84,11 +84,11 @@
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
 
         Employees = await dbContext.Employees
-        .OrderBy(c => c.HireDate)
-        .Select(c => new Employee
+        .OrderBy(e => e.HireDate)
+        .Select(e => new Employee
         {
-            FirstName = c.FirstName.ToUpper(),
-            LastName = c.LastName.ToUpper()
+            FirstName = e.FirstName.ToUpper(),
+            LastName = e.LastName.ToUpper()
         })
         .ToListAsync();
 

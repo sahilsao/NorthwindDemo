@@ -60,12 +60,16 @@
                             <MudTh>
                                 Customer ID
                             </MudTh>
+                            <MudTh>
+                                Freight
+                            </MudTh>
                         </HeaderContent>
                         <RowTemplate>
                             <MudTd DataLabel="Order ID">@context.OrderId</MudTd>
                             <MudTd DataLabel="Order Date">@context.OrderDate</MudTd>
                             <MudTd DataLabel="Shipped Date">@context.ShippedDate</MudTd>
                             <MudTd DataLabel="Customer Id">@context.CustomerId</MudTd>
+                            <MudTd DataLabel="Freight">@context.Freight</MudTd>
                         </RowTemplate>
                         <PagerContent>
                             <MudTablePager />
@@ -91,13 +95,15 @@
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
 
         Orders = await dbContext.Orders
-        .OrderBy(o => o.Freight)
+        .OrderByDescending(o => o.Freight)
+        .Take(10)
         .Select(o => new Order
         {
             OrderId = o.OrderId,
             OrderDate = o.OrderDate,
             ShippedDate = o.ShippedDate,
-            CustomerId = o.CustomerId
+            CustomerId = o.CustomerId,
+            Freight = o.Freight
         })
         .ToListAsync();
 
