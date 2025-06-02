@@ -1,4 +1,4 @@
-﻿@page "/exercises/exercise3"
+﻿@page "/exercises/exercise4"
 
 @using NorthwindDemo.Components.Layout.Exercises;
 @using System.ComponentModel.DataAnnotations;
@@ -11,7 +11,7 @@
 @inject NavigationManager NavigationManager
 @inject IDbContextFactory<DbContextNorthwind> DbContextFactory
 
-<PageTitle>Exercise 3</PageTitle>
+<PageTitle>Exercise 4</PageTitle>
 
 <MudGrid>
     <MudItem>
@@ -19,15 +19,14 @@
             <MudText Typo="Typo.h6" Color="Color.Primary">Exercise</MudText>
             <MudCard>
                 <MudCardContent>
-                    <MudText Typo="Typo.body2">3. Create a report that shows the capitalized FirstName and capitalized
-                        LastName renamed as FirstName and Lastname
-                        respectively and HireDate from the employees table sorted from the newest to the oldest
-                        employee.</MudText>
+                    <MudText Typo="Typo.body2">4. Create a report that shows the top 10 OrderID, OrderDate, ShippedDate,
+                        CustomerID, Freight from the orders table sorted
+                        by Freight in descending order.</MudText>
                 </MudCardContent>
                 <MudCardActions>
-                    @if (Employees == null)
+                    @if (Orders == null)
                     {
-                        <MudButton Disabled="@_processing" Variant="Variant.Text" OnClick="@GetEmployeesAsync"
+                        <MudButton Disabled="@_processing" Variant="Variant.Text" OnClick="@GetOrdersAsync"
                             Color="Color.Primary">
                             @if (_processing)
                             {
@@ -43,22 +42,30 @@
                 </MudCardActions>
             </MudCard>
 
-            @if (Employees != null)
+            @if (Orders != null)
             {
                 <MudText Typo="Typo.h6" Color="Color.Primary">Solution</MudText>
                 <MudPaper Class="pa-3">
-                    <MudTable Items="Employees" Hover="true" Elevation="0">
+                    <MudTable Items="Orders" Hover="true" Elevation="0">
                         <HeaderContent>
                             <MudTh>
-                                First Name
+                                Order ID
                             </MudTh>
                             <MudTh>
-                                Last Name
+                                Order Date
+                            </MudTh>
+                            <MudTh>
+                                Shipped Date
+                            </MudTh>
+                            <MudTh>
+                                Customer ID
                             </MudTh>
                         </HeaderContent>
                         <RowTemplate>
-                            <MudTd DataLabel="First Name">@context.FirstName</MudTd>
-                            <MudTd DataLabel="Last Name">@context.LastName</MudTd>
+                            <MudTd DataLabel="Order ID">@context.OrderId</MudTd>
+                            <MudTd DataLabel="Order Date">@context.OrderDate</MudTd>
+                            <MudTd DataLabel="Shipped Date">@context.ShippedDate</MudTd>
+                            <MudTd DataLabel="Customer Id">@context.CustomerId</MudTd>
                         </RowTemplate>
                         <PagerContent>
                             <MudTablePager />
@@ -74,8 +81,8 @@
 @code {
 
     private bool _processing = false;
-    public List<Employee>? Employees { get; set; }
-    private async Task GetEmployeesAsync()
+    public List<Order>? Orders { get; set; }
+    private async Task GetOrdersAsync()
     {
         _processing = true;
 
@@ -83,12 +90,14 @@
 
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
 
-        Employees = await dbContext.Employees
-        .OrderBy(c => c.HireDate)
-        .Select(c => new Employee
+        Orders = await dbContext.Orders
+        .OrderBy(o => o.Freight)
+        .Select(o => new Order
         {
-            FirstName = c.FirstName.ToUpper(),
-            LastName = c.LastName.ToUpper()
+            OrderId = o.OrderId,
+            OrderDate = o.OrderDate,
+            ShippedDate = o.ShippedDate,
+            CustomerId = o.CustomerId
         })
         .ToListAsync();
 
