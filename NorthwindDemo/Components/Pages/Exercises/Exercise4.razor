@@ -69,7 +69,7 @@
                             <MudTd DataLabel="Order Date">@context.OrderDate</MudTd>
                             <MudTd DataLabel="Shipped Date">@context.ShippedDate</MudTd>
                             <MudTd DataLabel="Customer Id">@context.CustomerId</MudTd>
-                            <MudTd DataLabel="Freight">@context.Freight</MudTd>
+                            <MudTd DataLabel="Freight">@(Convert.ToDecimal(context.Freight).ToString("C"))</MudTd>
                         </RowTemplate>
                         <PagerContent>
                             <MudTablePager />
