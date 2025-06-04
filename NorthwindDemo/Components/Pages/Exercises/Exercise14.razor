@@ -1,4 +1,4 @@
-﻿@page "/exercises/exercise4"
+﻿@page "/exercises/exercise14"
 
 @using NorthwindDemo.Components.Layout.Exercises;
 @using System.ComponentModel.DataAnnotations;
@@ -11,7 +11,7 @@
 @inject NavigationManager NavigationManager
 @inject IDbContextFactory<DbContextNorthwind> DbContextFactory
 
-<PageTitle>Exercise 4</PageTitle>
+<PageTitle>Exercise 14</PageTitle>
 
 <MudGrid>
     <MudItem>
@@ -19,14 +19,12 @@
             <MudText Typo="Typo.h6" Color="Color.Primary">Exercise</MudText>
             <MudCard>
                 <MudCardContent>
-                    <MudText Typo="Typo.body2">4. Create a report that shows the top 10 OrderID, OrderDate, ShippedDate,
-                        CustomerID, Freight from the orders table sorted
-                        by Freight in descending order.</MudText>
+                    <MudText Typo="Typo.body2">14. Create a report showing all the even numbers of OrderID from the orders table.</MudText>
                 </MudCardContent>
                 <MudCardActions>
                     @if (Orders == null)
                     {
-                        <MudButton Disabled="@_processing" Variant="Variant.Text" OnClick="@GetOrdersAsync"
+                        <MudButton Disabled="@_processing" Variant="Variant.Text" OnClick="@GetDetailsAsync"
                             Color="Color.Primary">
                             @if (_processing)
                             {
@@ -51,25 +49,9 @@
                             <MudTh>
                                 Order ID
                             </MudTh>
-                            <MudTh>
-                                Order Date
-                            </MudTh>
-                            <MudTh>
-                                Shipped Date
-                            </MudTh>
-                            <MudTh>
-                                Customer ID
-                            </MudTh>
-                            <MudTh>
-                                Freight
-                            </MudTh>
                         </HeaderContent>
-                        <RowTemplate>                            
-                            <MudTd DataLabel="Order ID">@context.OrderId</MudTd>
-                            <MudTd DataLabel="Order Date">@context.OrderDate?.ToString("dd/MM/yyyy")</MudTd>
-                            <MudTd DataLabel="Shipped Date">@context.ShippedDate?.ToString("dd/MM/yyyy")</MudTd>                                       
-                            <MudTd DataLabel="Customer Id">@context.CustomerId</MudTd>
-                            <MudTd DataLabel="Freight">@(Convert.ToDecimal(context.Freight).ToString("C"))</MudTd>             
+                        <RowTemplate>
+                            <MudTd DataLabel="OrderID">@context.OrderId</MudTd>
                         </RowTemplate>
                         <PagerContent>
                             <MudTablePager />
@@ -86,7 +68,7 @@
 
     private bool _processing = false;
     public List<Order>? Orders { get; set; }
-    private async Task GetOrdersAsync()
+    private async Task GetDetailsAsync()
     {
         _processing = true;
 
@@ -95,15 +77,10 @@
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
 
         Orders = await dbContext.Orders
-        .OrderByDescending(o => o.Freight)
-        .Take(10)
-        .Select(o => new Order
+        .Where(e => e.OrderId % 2 == 0) 
+        .Select(e => new Order
         {
-            OrderId = o.OrderId,
-            OrderDate = o.OrderDate,
-            ShippedDate = o.ShippedDate,
-            CustomerId = o.CustomerId,
-            Freight = o.Freight
+            OrderId = e.OrderId
         })
         .ToListAsync();
 

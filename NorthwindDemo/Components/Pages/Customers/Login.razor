@@ -22,7 +22,7 @@
 <MudGrid>
     <MudItem xs="12" sm="6">
         <MudImage ObjectFit="ObjectFit.Contain" Height="250" Src="@($"undraw_login_weas.svg")" Alt="login"
-                  Class="rounded-lg mt-20 align-right d-none d-sm-block" />
+            Class="rounded-lg mt-20 align-right d-none d-sm-block" />
     </MudItem>
     <MudItem xs="12" sm="6">
         <MudCardHeader>
@@ -54,7 +54,7 @@
 </MudGrid>
 
 <MudOverlay Visible="overlayVisible" DarkBackground="true" Absolute="true">
-    <MudProgressCircular Color="Color.Secondary" Indeterminate="true"/>
+    <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
 </MudOverlay>
 
 @code {
@@ -81,13 +81,14 @@
 
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
 
+
         var customer = await dbContext.Customers
         .Where(c => c.CustomerId == enteredId)
         .Select(c => new Customer
         {
             CustomerId = c.CustomerId,
             CompanyName = c.CompanyName,
-			ContactName = c.ContactName
+            ContactName = c.ContactName
         })
         .FirstOrDefaultAsync();
 
@@ -109,6 +110,7 @@
 
         await Task.CompletedTask;
     }
+
 
     private void OnValidSubmit(EditContext context)
     {

@@ -1,4 +1,4 @@
-﻿@page "/exercises/exercise4"
+﻿@page "/exercises/exercise9"
 
 @using NorthwindDemo.Components.Layout.Exercises;
 @using System.ComponentModel.DataAnnotations;
@@ -11,7 +11,7 @@
 @inject NavigationManager NavigationManager
 @inject IDbContextFactory<DbContextNorthwind> DbContextFactory
 
-<PageTitle>Exercise 4</PageTitle>
+<PageTitle>Exercise 9</PageTitle>
 
 <MudGrid>
     <MudItem>
@@ -19,14 +19,12 @@
             <MudText Typo="Typo.h6" Color="Color.Primary">Exercise</MudText>
             <MudCard>
                 <MudCardContent>
-                    <MudText Typo="Typo.body2">4. Create a report that shows the top 10 OrderID, OrderDate, ShippedDate,
-                        CustomerID, Freight from the orders table sorted
-                        by Freight in descending order.</MudText>
+                    <MudText Typo="Typo.body2">9. Create a report showing all the ContactName, Address, City of all customers not from Germany, Mexico, Spain. </MudText>
                 </MudCardContent>
                 <MudCardActions>
-                    @if (Orders == null)
+                    @if (Customers == null)
                     {
-                        <MudButton Disabled="@_processing" Variant="Variant.Text" OnClick="@GetOrdersAsync"
+                        <MudButton Disabled="@_processing" Variant="Variant.Text" OnClick="@GetCustomersAsync"
                             Color="Color.Primary">
                             @if (_processing)
                             {
@@ -42,34 +40,26 @@
                 </MudCardActions>
             </MudCard>
 
-            @if (Orders != null)
+            @if (Customers != null)
             {
                 <MudText Typo="Typo.h6" Color="Color.Primary">Solution</MudText>
                 <MudPaper Class="pa-3">
-                    <MudTable Items="Orders" Hover="true" Elevation="0">
+                    <MudTable Items="Customers" Hover="true" Elevation="0">
                         <HeaderContent>
                             <MudTh>
-                                Order ID
+                                Contact Name
                             </MudTh>
                             <MudTh>
-                                Order Date
-                            </MudTh>
+                                Address
+                            </MudTh>      
                             <MudTh>
-                                Shipped Date
-                            </MudTh>
-                            <MudTh>
-                                Customer ID
-                            </MudTh>
-                            <MudTh>
-                                Freight
-                            </MudTh>
+                                City
+                            </MudTh>                     
                         </HeaderContent>
-                        <RowTemplate>                            
-                            <MudTd DataLabel="Order ID">@context.OrderId</MudTd>
-                            <MudTd DataLabel="Order Date">@context.OrderDate?.ToString("dd/MM/yyyy")</MudTd>
-                            <MudTd DataLabel="Shipped Date">@context.ShippedDate?.ToString("dd/MM/yyyy")</MudTd>                                       
-                            <MudTd DataLabel="Customer Id">@context.CustomerId</MudTd>
-                            <MudTd DataLabel="Freight">@(Convert.ToDecimal(context.Freight).ToString("C"))</MudTd>             
+                        <RowTemplate>
+                            <MudTd DataLabel="Contact Name">@context.ContactName</MudTd>
+                            <MudTd DataLabel="Address">@context.Address</MudTd>
+                            <MudTd DataLabel="City">@context.City</MudTd>
                         </RowTemplate>
                         <PagerContent>
                             <MudTablePager />
@@ -85,8 +75,8 @@
 @code {
 
     private bool _processing = false;
-    public List<Order>? Orders { get; set; }
-    private async Task GetOrdersAsync()
+    public List<Customer>? Customers { get; set; }
+    private async Task GetCustomersAsync()
     {
         _processing = true;
 
@@ -94,16 +84,13 @@
 
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
 
-        Orders = await dbContext.Orders
-        .OrderByDescending(o => o.Freight)
-        .Take(10)
-        .Select(o => new Order
+        Customers = await dbContext.Customers
+        .Where(c => !new[] { "Germany", "Mexico", "Spain" }.Contains(c.Country))
+        .Select(c => new Customer
         {
-            OrderId = o.OrderId,
-            OrderDate = o.OrderDate,
-            ShippedDate = o.ShippedDate,
-            CustomerId = o.CustomerId,
-            Freight = o.Freight
+            ContactName = c.ContactName,
+            Address = c.Address,
+            City = c.City
         })
         .ToListAsync();
 
