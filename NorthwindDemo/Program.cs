@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMudServices(config =>
 {
     config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomEnd;
+    config.SnackbarConfiguration.VisibleStateDuration = 10000;
 });
 
 
@@ -20,8 +21,14 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddScoped<CustomerSessions>();
 
+builder.Services.AddHttpClient();
+
 builder.Services.AddDbContextFactory<DbContextNorthwind>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddDbContextFactory<TestContext>(
+    options => options.UseSqlServer(builder.Configuration.GetConnectionString("TrConnection")));
+
 
 var app = builder.Build();
 
