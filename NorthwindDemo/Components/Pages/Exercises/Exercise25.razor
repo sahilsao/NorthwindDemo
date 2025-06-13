@@ -1,5 +1,6 @@
-﻿@page "/exercises/exercise24"
+﻿@page "/exercises/exercise25"
 
+@using Microsoft.EntityFrameworkCore.Internal
 @using NorthwindDemo.Components.Layout.Exercises;
 @using System.ComponentModel.DataAnnotations;
 @using Microsoft.EntityFrameworkCore;
@@ -7,11 +8,10 @@
 @using NorthwindDemo.Entities;
 
 @layout ExercisesLayout
-
 @inject NavigationManager NavigationManager
 @inject IDbContextFactory<DbContextNorthwind> DbContextFactory
 
-<PageTitle>Exercise 24</PageTitle>
+<PageTitle>Exercise 25</PageTitle>
 
 <MudGrid>
     <MudItem>
@@ -19,14 +19,14 @@
             <MudText Typo="Typo.h6" Color="Color.Primary">Exercise</MudText>
             <MudCard>
                 <MudCardContent>
-                    <MudText Typo="Typo.body2">24. Create a report showing OrderID, total number of Order ID as
-                        NumberofOrders from the orderdetails table grouped by
-                        OrderID and sorted by NumberofOrders in descending order. HINT: you will need to use a Groupby
+                    <MudText Typo="Typo.body2">25. Create a report that shows the SupplierID, ProductName, CompanyName
+                        from all product Supplied by Exotic Liquids,
+                        Specialty Biscuits, Ltd., Escargots Nouveaux sorted by the supplier ID
                         statement.
                     </MudText>
                 </MudCardContent>
                 <MudCardActions>
-                    @if (orderSummaries == null)
+                    @if (supplierProducts == null)
                     {
                         <MudButton Disabled="@_processing" Variant="Variant.Text" OnClick="@GetDetailsAsync"
                             Color="Color.Primary">
@@ -44,22 +44,26 @@
                 </MudCardActions>
             </MudCard>
 
-            @if (orderSummaries != null)
+            @if (supplierProducts != null)
             {
                 <MudText Typo="Typo.h6" Color="Color.Primary">Solution</MudText>
                 <MudPaper Class="pa-3">
-                    <MudTable Items="orderSummaries" Hover="true" Elevation="0">
+                    <MudTable Items="supplierProducts" Hover="true" Elevation="0">
                         <HeaderContent>
                             <MudTh>
-                                Order ID
+                                Supplier ID
                             </MudTh>
                             <MudTh>
-                                Number of Orders
+                                Product Name
+                            </MudTh>
+                            <MudTh>
+                                Company Name
                             </MudTh>
                         </HeaderContent>
                         <RowTemplate>
-                            <MudTd DataLabel="Order Id">@context.OrderId</MudTd>
-                            <MudTd DataLabel="Number Of Orders">@context.NumberOfOrders</MudTd>
+                            <MudTd DataLabel=" Supplier ID">@context.SupplierId</MudTd>
+                            <MudTd DataLabel=" Product Name">@context.ProductName</MudTd>
+                            <MudTd DataLabel=" Company Name">@context.CompanyName</MudTd>
                         </RowTemplate>
                         <NoRecordsContent>
                             <MudText>No records found.</MudText>
@@ -78,30 +82,38 @@
 @code {
 
     private bool _processing = false;
-    public class OrderSummary
-    {
-        public int OrderId { get; set; }
-        public int NumberOfOrders { get; set; }
-    }
-    public List<OrderSummary>? orderSummaries { get; set; }
+
     private async Task GetDetailsAsync()
+
     {
         _processing = true;
 
+        // Simulate processing delay
         await Task.Delay(500);
 
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
 
-        orderSummaries = await dbContext.OrderDetails
-        .GroupBy(c => c.OrderId)
-        .Select(g => new OrderSummary
+        supplierProducts = await dbContext.Suppliers
+        .Where(x => x.CompanyName == "Exotic Liquids"
+        || x.CompanyName == "Specialty Biscuits, Ltd."
+        || x.CompanyName == "Escargots Nouveaux")
+        .Join(dbContext.Products, s => s.SupplierId, p => p.SupplierId, (s, p) => new SupplierProductDto
         {
-            OrderId = g.Key,
-            NumberOfOrders = g.Count()
+            SupplierId = s.SupplierId,
+            ProductName = p.ProductName,
+            CompanyName = s.CompanyName
         })
-        .OrderByDescending(x => x.NumberOfOrders)
+        .OrderBy(x => x.SupplierId)
         .ToListAsync();
-
-        _processing = false;
     }
+
+    private List<SupplierProductDto>? supplierProducts { get; set; }
+
+    public class SupplierProductDto
+    {
+        public int SupplierId { get; set; }
+        public string ProductName { get; set; } = string.Empty;
+        public string CompanyName { get; set; } = string.Empty;
+    }
+
 }
