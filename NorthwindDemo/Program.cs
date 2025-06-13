@@ -8,13 +8,12 @@ using NorthwindDemo.Sessions;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add MudBlazor services
-builder.Services.AddMudServices(config =>
+ builder.Services.AddMudServices(config =>
 {
     config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomEnd;
     config.SnackbarConfiguration.VisibleStateDuration = 10000;
 });
-
-
+ 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -25,9 +24,6 @@ builder.Services.AddHttpClient();
 
 builder.Services.AddDbContextFactory<DbContextNorthwind>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddDbContextFactory<TestContext>(
-    options => options.UseSqlServer(builder.Configuration.GetConnectionString("TrConnection")));
 
 
 var app = builder.Build();
