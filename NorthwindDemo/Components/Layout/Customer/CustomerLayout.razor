@@ -5,7 +5,6 @@
 @using NorthwindDemo.Sessions
 
 @inject ProtectedSessionStorage ProtectedSessionStorage
-@inject ProtectedSessionStorage ProtectedSessionStorage
 @inject NavigationManager NavigationManager
 @inject CustomerSessions CustomerSessions
 
@@ -146,7 +145,7 @@
         OverlayLight = "#1e1e2d80",
     };
 
-    public string DarkLightModeButtonIcon => _isDarkMode switch
+    private string DarkLightModeButtonIcon => _isDarkMode switch
     {
         true => Icons.Material.Rounded.DarkMode,
         false => Icons.Material.Outlined.WbSunny,
@@ -157,9 +156,9 @@
         _drawerOpen = !_drawerOpen;
     }
 
-    public string? ContactName { get; set; }
+    private string? ContactName { get; set; }
 
-    private async void Logout()
+    private async Task Logout()
     {
         await CustomerSessions.RemoveSessions();
         // Logout user
