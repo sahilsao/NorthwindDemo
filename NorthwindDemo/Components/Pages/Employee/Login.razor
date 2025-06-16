@@ -21,7 +21,7 @@
             </CardHeaderContent>
         </MudCardHeader>
         <MudCard Outlined="true">
-            <EditForm Model="@_loginModel" OnValidSubmit="OnValidSubmit">
+            <EditForm Model="@_loginModel" OnValidSubmit="HandleLogin">
                 <MudCardContent>
                     <DataAnnotationsValidator />
                     <MudTextField Label="User ID" HelperText="Enter your username" Class="mt-3"
@@ -34,7 +34,7 @@
                 </MudCardContent>
                 <MudCardActions>
                     <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
-                        OnClick="HandleLogin" Class="ml-auto mt-4">Login
+                        Class="ml-auto mt-4">Login
                     </MudButton>
                 </MudCardActions>
             </EditForm>
@@ -47,10 +47,10 @@
 
     public class LoginModel
     {
-        [Required] 
+        [Required]
         public string? UserName { get; set; }
 
-        [Required] 
+        [Required]
         public string? Password { get; set; }
     }
 
@@ -62,7 +62,7 @@
 
         if (_loginModel.UserName == id && _loginModel.Password == password)
         {
-          match = true;
+            match = true;
         }
 
         if (match == true)
@@ -76,11 +76,6 @@
         }
 
         await Task.CompletedTask;
-    }
-
-    private void OnValidSubmit(EditContext context)
-    {
-        StateHasChanged();
     }
 
     bool _isShow;
