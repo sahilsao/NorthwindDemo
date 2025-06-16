@@ -83,11 +83,11 @@
     }
 
     private async Task DarkModeToggle()
-    {
-        _isDarkMode = !_isDarkMode;
-
+    {       
         try
         {
+            _isDarkMode = !_isDarkMode;
+            
             // Save dark mode preference to protected local storage
             await ProtectedSessionStorage.SetAsync("darkMode", _isDarkMode);
         }
